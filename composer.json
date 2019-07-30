@@ -1,0 +1,31 @@
+{
+  "name": "happysir/distributed-lock",
+  "description": "A distributed lock based on PHP and redis(swoft)",
+  "type": "library",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "happysir",
+      "email": "luotao954@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">7.2",
+    "ext-redis": "*",
+    "swoft/redis": "2.0.4"
+  },
+  "require-dev": {
+    "swoft/swoole-ide-helper": "dev-master",
+    "phpunit/phpunit": "^7.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Happysir\\Lock\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "test/"
+    }
+  }
+}
