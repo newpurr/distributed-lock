@@ -43,6 +43,13 @@ interface LockInterface
     public function keepAlive(int $ttl = 3) : bool;
     
     /**
+     * check if the lock is valid
+     *
+     * @return bool
+     */
+    public function isAlive() : bool;
+    
+    /**
      * release lock
      *
      * @return bool

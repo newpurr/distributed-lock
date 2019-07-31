@@ -40,8 +40,11 @@ class AutoLoader extends SwoftComponent
     public function beans() : array
     {
         return [
+            // LockInterface::class => [
+            //     'class' => RedisLock::class
+            // ],
             // 'distributedLock' => [
-            //     'class' => bean(RedisLock::class)
+            //     'class' => bean(LockInterface::class)
             // ]
         ];
     }

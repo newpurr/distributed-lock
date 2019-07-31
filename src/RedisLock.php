@@ -7,7 +7,7 @@ use Swoft\Bean\Annotation\Mapping\Bean;
 use Swoft\Bean\Annotation\Mapping\Primary;
 use Swoft\Co;
 use Swoft\Context\Context;
-use Swoft\Log\Helper\Log;
+use Swoft\Log\Helper\CLog;
 use Swoft\Redis\Connection\Connection;
 use Swoft\Redis\Redis;
 use Swoole\Coroutine;
@@ -15,8 +15,8 @@ use Throwable;
 
 /**
  * Class RedisLock
- * @Primary()
  * @Bean(scope=Bean::PROTOTYPE)
+ * @Primary()
  */
 class RedisLock implements LockInterface
 {
@@ -32,8 +32,6 @@ class RedisLock implements LockInterface
      * @param int    $ttl
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     public function tryLock(string $key, int $ttl = 3) : bool
@@ -49,8 +47,6 @@ class RedisLock implements LockInterface
      * @param int    $retries number of retries
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     public function lock(string $key, int $ttl = 3, int $retries = 3) : bool
@@ -63,9 +59,11 @@ class RedisLock implements LockInterface
                 return true;
             }
             
-            Coroutine::sleep($ttl);
+            Coroutine::sleep(0.5);
             
             $times++;
+            
+            CLog::debug('Try to acquire the lock again, the number of attempts: %d', $times);
         }
         
         return false;
@@ -77,8 +75,6 @@ class RedisLock implements LockInterface
      * @param int $ttl
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     public function keepAlive(int $ttl = 3) : bool
@@ -103,10 +99,28 @@ LUA;
         
         try {
             $eval = $this->getConnection()->eval($lua, [$this->key, $ttl], 1);
-    
+            
             return $eval !== -2;
         } catch (Throwable $e) {
-            Log::getLogger()->info($e->getMessage());
+            CLog::error($e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
+     * check if the lock is valid
+     *
+     * @return bool
+     * @throws \Throwable
+     */
+    public function isAlive() : bool
+    {
+        try {
+            $eval = $this->getConnection()->ttl($this->key);
+            
+            return $eval !== -2;
+        } catch (Throwable $e) {
+            CLog::error($e->getMessage());
             throw $e;
         }
     }
@@ -115,16 +129,16 @@ LUA;
      * release lock
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     public function unLock() : bool
     {
         try {
+            CLog::debug('release lock');
+    
             return (bool)$this->getConnection()->del($this->key) >= 0;
         } catch (Throwable $e) {
-            Log::getLogger()->info($e->getMessage());
+            CLog::error($e->getMessage());
             throw $e;
         }
     }
@@ -147,20 +161,18 @@ LUA;
      * @param int    $ttl
      *
      * @return bool
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     protected function doLock(string $key, int $ttl = 3) : bool
     {
         $this->key = $key;
         
-        $parameters = [$this->key, 1, ['nx', 'ex' => $ttl]];
-        
         try {
-            $result = (bool)$this->getConnection()->command('set', $parameters);
+            $parameters = [$this->key, 1, ['nx', 'ex' => $ttl]];
+            $result     = (bool)$this->getConnection()->command('set', $parameters);
             
             if ($result) {
+                CLog::debug('successfully hold lock, initialize the watchdog task');
                 Co::create(function () use ($ttl) {
                     $this->watchDog($ttl);
                 }, false);
@@ -168,7 +180,7 @@ LUA;
             
             return $result;
         } catch (Throwable $e) {
-            Log::getLogger()->info($e->getMessage());
+            CLog::error($e->getMessage());
             throw $e;
         }
     }
@@ -178,21 +190,33 @@ LUA;
      *
      * @param int $ttl
      *
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     protected function watchDog(int $ttl = 3)
     {
+        $sleepTime = $ttl > 1 ? $ttl - 1 : 0.5;
+        
         while (true) {
-            $sleepTime = $ttl - 3;
-            
             Coroutine::sleep($sleepTime);
             
-            if (!Context::get() || !$this->keepAlive($ttl)) {
-                Log::getLogger()->info('Cleanup watch dog task');
+            try {
+                Context::mustGet();
+            } catch (Throwable $e) {
+                CLog::debug('cleanup watch dog task after request completed');
                 break;
             }
+            
+            if (!$this->isAlive()) {
+                CLog::debug('cleanup watch dog task when the lock has expired');
+                break;
+            }
+            
+            if (!$this->keepAlive($ttl)) {
+                CLog::debug('cleanup watch dog task when renewal failure');
+                break;
+            }
+            
+            CLog::debug('watch dog successful renewal %s s', $ttl);
         }
     }
 }
