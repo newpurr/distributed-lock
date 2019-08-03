@@ -1,8 +1,9 @@
-<?php declare(strict_types = 1);
+<?php declare(strict_types=1);
 
-namespace Happysir\Lock;
 
-use Happysir\Lock\Contract\LockInterface;
+namespace SwoftTest\Limiter\Testing;
+
+
 use Swoft\SwoftComponent;
 
 /**
@@ -17,17 +18,17 @@ class AutoLoader extends SwoftComponent
      *
      * @return array
      */
-    public function getPrefixDirs() : array
+    public function getPrefixDirs(): array
     {
         return [
             __NAMESPACE__ => __DIR__,
         ];
     }
-    
+
     /**
      * @return array
      */
-    public function metadata() : array
+    public function metadata(): array
     {
         return [];
     }

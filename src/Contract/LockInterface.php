@@ -18,6 +18,7 @@ interface LockInterface
      * @param int    $ttl
      *
      * @return bool
+     * @throws \Throwable
      */
     public function tryLock(string $key, int $ttl = 3) : bool;
     
@@ -30,8 +31,25 @@ interface LockInterface
      * @param int    $retries number of retries
      *
      * @return bool
+     * @throws \Throwable
      */
     public function lock(string $key, int $ttl = 3, int $retries = 3) : bool;
+    
+    
+    /**
+     * release lock
+     *
+     * @return bool
+     * @throws \Throwable
+     */
+    public function unLock() : bool;
+    
+    /**
+     * get lock life ttl
+     *
+     * @return int
+     */
+    public function lockTtl() : int;
     
     /**
      * Let the lock last for N seconds, the default N is 3
@@ -39,6 +57,7 @@ interface LockInterface
      * @param int $ttl
      *
      * @return bool
+     * @throws \Throwable
      */
     public function keepAlive(int $ttl = 3) : bool;
     
@@ -46,13 +65,7 @@ interface LockInterface
      * check if the lock is valid
      *
      * @return bool
+     * @throws \Throwable
      */
     public function isAlive() : bool;
-    
-    /**
-     * release lock
-     *
-     * @return bool
-     */
-    public function unLock() : bool;
 }
