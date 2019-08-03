@@ -12,20 +12,25 @@
   "require": {
     "php": ">7.2",
     "ext-redis": "*",
-    "swoft/redis": "2.0.4"
+    "ramsey/uuid": "3.8.0"
   },
   "require-dev": {
     "swoft/swoole-ide-helper": "dev-master",
+    "swoft/framework": "~2.0.0",
+    "swoft/redis": "~2.0.0",
     "phpunit/phpunit": "^7.5"
   },
   "autoload": {
     "psr-4": {
       "Happysir\\Lock\\": "src/"
-    }
+    },
+    "files": [
+      "./src/Helper/Functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
-      "Test\\": "test/"
+      "Happysir\\Lock\\Test\\": "test/"
     }
   }
 }
