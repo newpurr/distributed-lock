@@ -1,8 +1,9 @@
 <?php declare(strict_types = 1);
 
-namespace Swoft\Limiter\Annotation\Parser;
+namespace Happysir\Lock\Annotation\Parser;
 
 use Happysir\Lock\Annotation\Mapping\DistributedLock;
+use Happysir\Lock\DistributedLockRegister;
 use Swoft\Annotation\Annotation\Mapping\AnnotationParser;
 use Swoft\Annotation\Annotation\Parser\Parser;
 
@@ -23,6 +24,12 @@ class DistributedLockParser extends Parser
      */
     public function parse(int $type, $annotationObject) : array
     {
+        if ($type !== self::TYPE_METHOD) {
+            return [];
+        }
+        
+        DistributedLockRegister::registerLock($this->className, $this->methodName, $annotationObject);
+        
         return [];
     }
 }

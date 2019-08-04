@@ -8,6 +8,7 @@ use Swoft\Bean\Annotation\Mapping\Primary;
 use Swoft\Co;
 use Swoft\Log\Helper\CLog;
 use Swoft\Redis\Connection\Connection;
+use Swoft\Redis\Pool;
 use Swoft\Redis\Redis;
 use Swoole\Coroutine;
 use Throwable;
@@ -20,6 +21,11 @@ use function swoole_random_int;
  */
 class RedisLock implements LockInterface
 {
+    /**
+     * @var string
+     */
+    private $pool = Pool::DEFAULT_POOL;
+    
     /**
      * the lock key
      *
@@ -78,8 +84,13 @@ class RedisLock implements LockInterface
             Coroutine::sleep(0.5);
             
             $times++;
-            
-            CLog::debug('Try to acquire the lock again, the number of attempts: %d', $times);
+    
+            CLog::debug(
+                'worker[%s] co[%s]Try to acquire the lock again, the number of attempts: %d',
+                server()->getSwooleServer()->worker_id,
+                Co::tid(),
+                $times
+            );
         }
         
         return false;
@@ -188,7 +199,7 @@ LUA;
      */
     protected function getConnection() : Connection
     {
-        return Redis::connection();
+        return Redis::connection($this->pool);
     }
     
     /**
@@ -216,9 +227,11 @@ LUA;
             
             if ($result) {
                 CLog::debug(
-                    'worker[%s] co[%s] successfully hold lock[uuid:%s], initialize the watchdog task',
+                    'worker[%s] co[%s] successfully hold lock[uuid:%s,key:%s], initialize the watchdog task',
                     server()->getSwooleServer()->worker_id,
-                    Co::tid()
+                    Co::tid(),
+                    $this->value,
+                    $key
                 );
                 
                 Co::create(
