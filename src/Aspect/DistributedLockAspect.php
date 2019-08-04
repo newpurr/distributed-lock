@@ -4,7 +4,10 @@ namespace Happysir\Lock\Aspect;
 
 use Happysir\Lock\Annotation\Mapping\DistributedLock;
 use Happysir\Lock\Contract\LockInterface;
+use Happysir\Lock\DistributedLockRegister;
+use Happysir\Lock\Exception\RedisLockException;
 use Happysir\Lock\RedisLock;
+use ReflectionException;
 use Swoft\Aop\Annotation\Mapping\After;
 use Swoft\Aop\Annotation\Mapping\AfterReturning;
 use Swoft\Aop\Annotation\Mapping\AfterThrowing;
@@ -14,7 +17,12 @@ use Swoft\Aop\Annotation\Mapping\Before;
 use Swoft\Aop\Annotation\Mapping\PointAnnotation;
 use Swoft\Aop\Point\JoinPoint;
 use Swoft\Aop\Point\ProceedingJoinPoint;
+use Swoft\Aop\Proxy;
 use Swoft\Co;
+use Swoft\Context\Context;
+use Swoft\Stdlib\Reflections;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Throwable;
 
 /**
  * Class DistributedLockAspect
@@ -41,14 +49,11 @@ class DistributedLockAspect
      */
     public function around(ProceedingJoinPoint $proceedingJoinPoint)
     {
+        
         // Before around
-        $this->tryLock();
-        
-        $result = $proceedingJoinPoint->proceed();
-        
-        // After around
-        
-        return $result;
+        $this->tryLock($proceedingJoinPoint);
+
+        return $proceedingJoinPoint->proceed();
     }
     
     /**
@@ -78,11 +83,7 @@ class DistributedLockAspect
      */
     public function afterReturn(JoinPoint $joinPoint)
     {
-        $ret = $joinPoint->getReturn();
-
-        // After return
-        
-        return $ret;
+        return $joinPoint->getReturn();
     }
     
     /**
@@ -91,7 +92,7 @@ class DistributedLockAspect
      * @throws \Throwable
      * @AfterThrowing()
      */
-    public function afterThrowing(\Throwable $throwable)
+    public function afterThrowing(Throwable $throwable)
     {
         throw $throwable;
     }
@@ -99,17 +100,45 @@ class DistributedLockAspect
     /**
      * try to acquire a lock
      *
+     * @param \Swoft\Aop\Point\ProceedingJoinPoint $proceedingJoinPoint
      * @return bool
      * @throws \Happysir\Lock\Exception\RedisLockException
      * @throws \ReflectionException
      * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
-    protected function tryLock() : bool
+    protected function tryLock(ProceedingJoinPoint $proceedingJoinPoint) : bool
     {
-        // TODO 替换成注解收集的信息
-        if (!$this->getRedisLock()->tryLock('test', 50)) {
-            throw new RedisLockException('worker[%s] co[%s] failed to acquire lock', server()->getSwooleServer()->worker_id, Co::tid());
+        $args      = $proceedingJoinPoint->getArgs();
+        $target    = $proceedingJoinPoint->getTarget();
+        $method    = $proceedingJoinPoint->getMethod();
+        
+        // get class name
+        $className = get_class($target);
+        $className = Proxy::getOriginalClassName($className);
+    
+        // get config
+        $config = DistributedLockRegister::getLock($className, $method);
+        
+        // init key
+        $key    = $config->getKey();
+        $key = !empty($key)
+            ? $this->evaluateKey($key, $className, $method, $args)
+            : md5(sprintf('%s:%s', $className, $method));
+        
+        // get lock
+        $result = $config->isNonBlocking()
+            ? $this->getRedisLock()->tryLock($key, $config->getTtl())
+            : $this->getRedisLock()->lock($key, $config->getTtl(), $config->getRetries());
+        
+        if (!$result) {
+            $errCode = $config->getErrCode();
+            $errMsg  = $config->getErrMsg();
+            if (!$errMsg) {
+                $errMsg = sprintf('worker[%s] co[%s] failed to acquire lock', server()->getSwooleServer()->worker_id, Co::tid());
+            }
+            
+            throw new RedisLockException($errMsg, $errCode);
         }
         
         return true;
@@ -158,5 +187,43 @@ class DistributedLockAspect
         unset($this->lock[Co::tid()]);
     
         return true;
+    }
+    
+    /**
+     * @param string $key
+     * @param string $className
+     * @param string $method
+     * @param array  $params
+     *
+     * @return string
+     * @throws ReflectionException
+     */
+    private function evaluateKey(string $key, string $className, string $method, array $params): string
+    {
+        $values   = [];
+        $rcMethod = Reflections::get($className);
+        $rcParams = $rcMethod['methods'][$method]['params'] ?? [];
+        
+        $index = 0;
+        foreach ($rcParams as $rcParam) {
+            [$pName] = $rcParam;
+            $values[$pName] = $params[$index];
+            $index++;
+        }
+        
+        // Inner vars
+        $values['CLASS']   = $className;
+        $values['METHOD']  = $method;
+        $values[$key]      = $key;
+    
+        $context = Context::get();
+        if ($context !== null && !isset($values['request'])) {
+            $values['request'] = $context->getRequest();
+        }
+        
+        // Parse express language
+        $el = new ExpressionLanguage();
+        
+        return $el->evaluate($key, $values);
     }
 }

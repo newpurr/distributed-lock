@@ -18,6 +18,7 @@
     "swoft/swoole-ide-helper": "dev-master",
     "swoft/framework": "~2.0.0",
     "swoft/redis": "~2.0.0",
+    "symfony/expression-language": "~4.3",
     "phpunit/phpunit": "^7.5"
   },
   "autoload": {
