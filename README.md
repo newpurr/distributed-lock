@@ -97,6 +97,8 @@ class HomeController
 - `errmsg` 尝试持有锁时抛出的异常对应的msg
 - `retries` 重试次数
 
+> key 这里支持 symfony/expression-language 表达式，可以实现很多复杂的功能，[详细文档](http://www.symfonychina.com/doc/current/components/expression_language/syntax.html)。key 表达式内置 CLASS(类名) 和 METHOD(方法名称) 两个变量，方便开发者使用。详细使用参考[Swoft服务限流章节](http://www.symfonychina.com/doc/current/components/expression_language/syntax.html)
+
 #### 代码方式
 ##### `DistributedLock::NON_BLOCKING`
 ```php
