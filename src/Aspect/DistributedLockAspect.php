@@ -3,9 +3,10 @@
 namespace Happysir\Lock\Aspect;
 
 use Happysir\Lock\Annotation\Mapping\DistributedLock;
+use Happysir\Lock\Concern\System;
 use Happysir\Lock\Contract\LockInterface;
 use Happysir\Lock\DistributedLockRegister;
-use Happysir\Lock\Exception\RedisLockException;
+use Happysir\Lock\Exception\DistributedLockException;
 use Happysir\Lock\RedisLock;
 use ReflectionException;
 use Swoft\Aop\Annotation\Mapping\After;
@@ -31,6 +32,8 @@ use Throwable;
  */
 class DistributedLockAspect
 {
+    use System;
+    
     /**
      * @var \Happysir\Lock\RedisLock[]
      */
@@ -42,7 +45,7 @@ class DistributedLockAspect
      * @param ProceedingJoinPoint $proceedingJoinPoint
      *
      * @return mixed
-     * @throws \Happysir\Lock\Exception\RedisLockException
+     * @throws \Happysir\Lock\Exception\DistributedLockException
      * @throws \ReflectionException
      * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
@@ -102,7 +105,7 @@ class DistributedLockAspect
      *
      * @param \Swoft\Aop\Point\ProceedingJoinPoint $proceedingJoinPoint
      * @return bool
-     * @throws \Happysir\Lock\Exception\RedisLockException
+     * @throws \Happysir\Lock\Exception\DistributedLockException
      * @throws \ReflectionException
      * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
@@ -135,10 +138,10 @@ class DistributedLockAspect
             $errCode = $config->getErrCode();
             $errMsg  = $config->getErrMsg();
             if (!$errMsg) {
-                $errMsg = sprintf('worker[%s] co[%s] failed to acquire lock', server()->getSwooleServer()->worker_id, Co::tid());
+                $errMsg = sprintf('worker[%s] co[%s] failed to acquire lock', $this->getWorkId(), Co::tid());
             }
             
-            throw new RedisLockException($errMsg, $errCode);
+            throw new DistributedLockException($errMsg, $errCode);
         }
         
         return true;

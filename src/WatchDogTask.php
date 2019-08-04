@@ -2,6 +2,7 @@
 
 namespace Happysir\Lock;
 
+use Happysir\Lock\Concern\System;
 use Happysir\Lock\Contract\LockInterface;
 use Swoft\Bean\Annotation\Mapping\Bean;
 use Swoft\Co;
@@ -18,6 +19,7 @@ use Throwable;
  */
 class WatchDogTask implements Contract\WatchDogInterface
 {
+    use System;
     
     /**
      * watchdog sentinel automatic renewal mechanism
@@ -28,7 +30,7 @@ class WatchDogTask implements Contract\WatchDogInterface
      */
     public function sentinel(LockInterface $lock) : bool
     {
-        $workerId = server()->getSwooleServer()->worker_id;
+        $workerId = $this->getWorkId();
         $tid      = Co::tid();
         
         CLog::debug('worker[%s] co[%s] successfully initialize the watchdog task', $workerId, $tid);

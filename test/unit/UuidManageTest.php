@@ -1,8 +1,8 @@
 <?php
 
-namespace Happysir\Lock\Test;
+namespace Happysir\Lock\Unit;
 
-use Happysir\Lock\UuidManage;
+use Happysir\Lock\Bean\UuidManage;
 use PHPUnit\Framework\TestCase;
 
 class UuidManageTest extends TestCase

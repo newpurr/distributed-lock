@@ -37,7 +37,7 @@ class DistributedLock
      *
      * @var string
      */
-    protected $key;
+    protected $key = '';
     
     /**
      * ttl

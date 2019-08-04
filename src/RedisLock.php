@@ -2,6 +2,7 @@
 
 namespace Happysir\Lock;
 
+use Happysir\Lock\Concern\System;
 use Happysir\Lock\Contract\LockInterface;
 use Swoft\Bean\Annotation\Mapping\Bean;
 use Swoft\Bean\Annotation\Mapping\Primary;
@@ -21,6 +22,8 @@ use function swoole_random_int;
  */
 class RedisLock implements LockInterface
 {
+    use System;
+    
     /**
      * @var string
      */
@@ -87,7 +90,7 @@ class RedisLock implements LockInterface
     
             CLog::debug(
                 'worker[%s] co[%s]Try to acquire the lock again, the number of attempts: %d',
-                server()->getSwooleServer()->worker_id,
+                $this->getWorkId(),
                 Co::tid(),
                 $times
             );
@@ -179,7 +182,7 @@ LUA;
             if ($eval) {
                 CLog::debug(
                     'worker[%s] co[%s]successful release unlock',
-                    server()->getSwooleServer()->worker_id,
+                    $this->getWorkId(),
                     Co::tid()
                 );
             }
@@ -228,7 +231,7 @@ LUA;
             if ($result) {
                 CLog::debug(
                     'worker[%s] co[%s] successfully hold lock[uuid:%s,key:%s], initialize the watchdog task',
-                    server()->getSwooleServer()->worker_id,
+                    $this->getWorkId(),
                     Co::tid(),
                     $this->value,
                     $key

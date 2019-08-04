@@ -31,7 +31,9 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Happysir\\Lock\\Test\\": "test/"
+      "Happysir\\Lock\\Test\\": "test/",
+      "Happysir\\Lock\\Unit\\": "test/unit/",
+      "Happysir\\Lock\\Testing\\": "test/testing/"
     }
   }
 }

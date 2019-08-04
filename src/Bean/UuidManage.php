@@ -1,7 +1,8 @@
 <?php
 
-namespace Happysir\Lock;
+namespace Happysir\Lock\Bean;
 
+use Happysir\Lock\Contract;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use Ramsey\Uuid\Uuid;
 use Swoft\Bean\Annotation\Mapping\Bean;

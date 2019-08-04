@@ -3,11 +3,11 @@
 namespace Happysir\Lock\Exception;
 
 /**
- * Class RedisLockException
+ * Class DistributedLockException
  *
  * @package Happysir\Lock\Exception
  */
-class RedisLockException extends \Exception
+class DistributedLockException extends \Exception
 {
     protected $code = 39281890;
     
