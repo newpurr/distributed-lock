@@ -58,6 +58,7 @@ namespace App\Http\Controller;
 use App\Model\Entity\TestAaaa;
 use Happysir\Lock\Annotation\Mapping\DistributedLock;
 use Swoft\Context\Context;
+use Swoft\Http\Message\Request;
 use Swoft\Http\Message\Response;
 use Swoft\Http\Server\Annotation\Mapping\Controller;
 use Swoft\Http\Server\Annotation\Mapping\RequestMapping;
@@ -77,7 +78,19 @@ class HomeController
      * @DistributedLock(key="request.getUriPath()~':'~request.query('id')",ttl=6,type=DistributedLock::RETRY_TO_GET)
      * @throws Throwable
      */
-    public function index(): Response
+    public function index(Request $request): Response
+    {
+        Coroutine::sleep(1);
+        
+        return Context::mustGet()->getResponse();
+    }
+
+    /**
+     * @RequestMapping("/hello")
+     * @DistributedLock(key="hello~':'~request.query('id')",ttl=6,type=DistributedLock::NON_BLOCKING)
+     * @throws Throwable
+     */
+    public function hello(Request $request): Response
     {
         Coroutine::sleep(1);
         

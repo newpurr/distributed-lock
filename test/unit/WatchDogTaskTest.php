@@ -22,7 +22,7 @@ class WatchDogTaskTest extends TestCase
         go(
             function () use ($watchDog, $lock, $channel) {
             $this->assertTrue($watchDog->sentinel($lock));
-                $channel->push(1);
+            $channel->push(1);
         });
         $channel->pop();
     }
