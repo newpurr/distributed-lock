@@ -12,7 +12,8 @@
   "require": {
     "php": ">7.2",
     "ext-redis": "*",
-    "ramsey/uuid": "3.8.0"
+    "ramsey/uuid": "3.8.0",
+    "ext-json": "*"
   },
   "require-dev": {
     "swoft/swoole-ide-helper": "dev-master",

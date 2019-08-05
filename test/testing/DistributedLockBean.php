@@ -13,7 +13,7 @@ use Swoft\Bean\Annotation\Mapping\Bean;
 class DistributedLockBean
 {
     /**
-     * @DistributedLock(type=DistributedLock::RETRY_TO_GET,ttl=1,retries=100)
+     * @DistributedLock(type=DistributedLock::RETRY_TO_GET,ttl=1,retries=10)
      *
      * @return string
      */
@@ -30,6 +30,17 @@ class DistributedLockBean
     public function nonBlocking(): string
     {
         return 'nonBlocking';
+    }
+    
+    /**
+     * @DistributedLock(key="req['a']",type=DistributedLock::NON_BLOCKING)
+     *
+     * @param array $req
+     * @return string
+     */
+    public function expressionLanguage(array $req): string
+    {
+        return 'expression-language';
     }
     
     /**

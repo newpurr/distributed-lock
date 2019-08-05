@@ -2,9 +2,8 @@
 
 namespace Happysir\Lock\Unit;
 
-use Happysir\Lock\Testing\DistributedLockBean;
+use Happysir\Lock\RedisLock;
 use PHPUnit\Framework\TestCase;
-use Swoft\Bean\BeanFactory;
 
 /**
  * Class DistributedLockTest
@@ -16,70 +15,38 @@ class DistributedLockTest extends TestCase
     /**
      * @throws \ReflectionException
      * @throws \Swoft\Bean\Exception\ContainerException
-     * @expectedException \Happysir\Lock\Exception\DistributedLockException
+     * @throws \Throwable
      */
     public function testNonBlocking()
     {
-        /* @var DistributedLockBean $bean */
-        $bean = BeanFactory::getBean(DistributedLockBean::class);
+        /* @var RedisLock $bean */
+        $bean = bean(RedisLock::class);
         
-        $this->assertEquals('nonBlocking', $bean->nonBlocking());
-        $this->assertEquals('nonBlocking', $bean->nonBlocking());
+        $this->assertTrue( $bean->tryLock('test1', 1 ));
+        $this->assertTrue( $bean->unLock());
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
+     * @throws \Throwable
      */
     public function testNonBlocking2()
     {
-        /* @var DistributedLockBean $bean */
-        $bean = BeanFactory::getBean(DistributedLockBean::class);
-        
-        $this->assertEquals('nonBlocking3', $bean->nonBlocking3());
-        $this->assertEquals('nonBlocking2', $bean->nonBlocking2());
+        $bean = new RedisLock();
+    
+        $this->assertTrue( $bean->tryLock('test11', 1 ));
+        $this->assertFalse( $bean->tryLock('test11', 1 ));
+        $this->assertTrue( $bean->unLock());
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
-     * @expectedException \Happysir\Lock\Exception\DistributedLockException
-     * @expectedExceptionCode 1234
-     */
-    public function testExceptionCode()
-    {
-        /* @var DistributedLockBean $bean */
-        $bean = BeanFactory::getBean(DistributedLockBean::class);
-        
-        $this->assertEquals('exceptionCode', $bean->exceptionCode());
-        $this->assertEquals('exceptionCode', $bean->exceptionCode());
-    }
-    
-    /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
-     * @expectedException \Happysir\Lock\Exception\DistributedLockException
-     * @expectedExceptionMessage hello world
-     */
-    public function testExceptionMsg()
-    {
-        /* @var DistributedLockBean $bean */
-        $bean = BeanFactory::getBean(DistributedLockBean::class);
-        
-        $this->assertEquals('exceptionMsg', $bean->exceptionMsg());
-        $this->assertEquals('exceptionMsg', $bean->exceptionMsg());
-    }
-    
-    /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
+     * @throws \Throwable
      */
     public function testRetryToGet()
     {
-        /* @var DistributedLockBean $bean */
-        $bean = BeanFactory::getBean(DistributedLockBean::class);
+        $bean = new RedisLock();
         
-        $this->assertEquals('retryToGet', $bean->retryToGet());
-        $this->assertEquals('retryToGet', $bean->retryToGet());
+        $this->assertTrue( $bean->lock('test12', 1 , 2));
+        $this->assertTrue( $bean->lock('test12', 1 , 4));
+        $this->assertTrue( $bean->unLock());
     }
 }

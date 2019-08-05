@@ -91,11 +91,11 @@ class HomeController
 - `key` 锁资源唯一标识key，同一时间片只能由一个线程持有
 - `type` 锁类型 
     - `DistributedLock::NON_BLOCKING`类型，在获取锁失败时会直接抛出`DistributedLockException`异常
-    - `DistributedLock::RETRY_TO_GET`类型，在获取锁失败时，会重新尝试获取锁（每0.5s重试一次，最多重试'retries'次），超过最大重试次数后会抛出`DistributedLockException`异常
+    - `DistributedLock::RETRY_TO_GET`类型，在获取锁失败时，会重新尝试获取锁（每0.5s重试一次，最多重试retries次），超过最大重试次数后会抛出`DistributedLockException`异常
 - `ttl` 锁的有效时间（ttls后锁会自动过期）
 - `errcode` 尝试持有锁时抛出的异常对应的code
 - `errmsg` 尝试持有锁时抛出的异常对应的msg
-- `retries` 重试次数
+- `retries` 重试次数(需要注意的是，重试次数过多，可能会造成系统负载上升，因此硬性限制最大重试次数为10次)
 
 > key 这里支持 symfony/expression-language 表达式，可以实现很多复杂的功能，[详细文档](http://www.symfonychina.com/doc/current/components/expression_language/syntax.html)。key 表达式内置 CLASS(类名) 和 METHOD(方法名称) 两个变量，方便开发者使用。详细使用参考Swoft[服务限流](https://www.swoft.org/docs/2.x/zh-CN/ms/govern/limiter.html#%E4%BD%BF%E7%94%A8)章节
 

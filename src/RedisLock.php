@@ -4,6 +4,7 @@ namespace Happysir\Lock;
 
 use Happysir\Lock\Concern\System;
 use Happysir\Lock\Contract\LockInterface;
+use Happysir\Lock\Exception\DistributedLockException;
 use Swoft\Bean\Annotation\Mapping\Bean;
 use Swoft\Bean\Annotation\Mapping\Primary;
 use Swoft\Co;
@@ -76,6 +77,17 @@ class RedisLock implements LockInterface
      */
     public function lock(string $key, int $ttl = 3, int $retries = 3) : bool
     {
+        if ($retries > 5) {
+            CLog::warning(
+                'worker[%s] co[%s]too many retries, it is recommended to reduce the number of retries',
+                $this->getWorkId(),
+                Co::tid()
+            );
+        }
+        if ($retries > 10) {
+            throw new DistributedLockException('exceeded the maximum number of retries');
+        }
+        
         $times = 0;
         
         while ($times < $retries) {

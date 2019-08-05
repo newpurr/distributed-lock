@@ -21,11 +21,8 @@ trait System
     {
         try {
             $server = server();
-            if ($server === null) {
-                return 0;
-            }
     
-            return $server->getSwooleServer()->worker_id;
+            return $server ? $server->getSwooleServer()->worker_id : 0;
         } catch (Throwable $e) {
             return 0;
         }
