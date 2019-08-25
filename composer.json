@@ -36,5 +36,11 @@
       "Happysir\\Lock\\Unit\\": "test/unit/",
       "Happysir\\Lock\\Testing\\": "test/testing/"
     }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://mirrors.aliyun.com/composer/"
+    }
   }
 }

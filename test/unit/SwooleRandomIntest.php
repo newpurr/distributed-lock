@@ -6,7 +6,10 @@ use PHPUnit\Framework\TestCase;
 
 class SwooleRandomIntest extends TestCase
 {
-    public function testGenerate()
+    /**
+     * testGenerate
+     */
+    public function testGenerate() : void
     {
         try {
             $this->assertNotEmpty(swoole_random_int(1, 100));

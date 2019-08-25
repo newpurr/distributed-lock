@@ -12,7 +12,7 @@ class WatchDogTaskTest extends TestCase
     /**
      * @throws \Throwable
      */
-    public function testSentinel()
+    public function testSentinel() : void
     {
         $lock = new RedisLock();
         $lock->tryLock('testSentinel', 1);

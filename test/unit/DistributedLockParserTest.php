@@ -11,10 +11,10 @@ use Swoft\Annotation\Annotation\Parser\Parser;
 
 class DistributedLockParserTest extends TestCase
 {
-    public function testParser()
+    public function testParser() : array
     {
         $reflectClass = new ReflectionClass(__CLASS__);
-        $lock = new DistributedLock([]);
+        $lock         = new DistributedLock([]);
         
         $parser = new DistributedLockParser(__CLASS__, $reflectClass, []);
         $parser->setMethodName(__METHOD__);
@@ -22,6 +22,7 @@ class DistributedLockParserTest extends TestCase
         $this->assertSame([], $parser->parse(Parser::TYPE_METHOD, $lock));
         
         $this->assertSame($lock, DistributedLockRegister::getLock(__CLASS__, __METHOD__));
+        
         return [];
     }
 }
