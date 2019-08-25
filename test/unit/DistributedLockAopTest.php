@@ -14,11 +14,9 @@ use Swoft\Bean\BeanFactory;
 class DistributedLockAopTest extends TestCase
 {
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @expectedException \Happysir\Lock\Exception\DistributedLockException
      */
-    public function testNonBlocking()
+    public function testNonBlocking() : void
     {
         /* @var DistributedLockBean $bean */
         $bean = BeanFactory::getBean(DistributedLockBean::class);
@@ -28,10 +26,9 @@ class DistributedLockAopTest extends TestCase
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
+     * testNonBlocking2
      */
-    public function testNonBlocking2()
+    public function testNonBlocking2() : void
     {
         /* @var DistributedLockBean $bean */
         $bean = BeanFactory::getBean(DistributedLockBean::class);
@@ -41,12 +38,10 @@ class DistributedLockAopTest extends TestCase
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @expectedException \Happysir\Lock\Exception\DistributedLockException
      * @expectedExceptionCode 1234
      */
-    public function testExceptionCode()
+    public function testExceptionCode() : void
     {
         /* @var DistributedLockBean $bean */
         $bean = BeanFactory::getBean(DistributedLockBean::class);
@@ -56,12 +51,10 @@ class DistributedLockAopTest extends TestCase
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @expectedException \Happysir\Lock\Exception\DistributedLockException
      * @expectedExceptionMessage hello world
      */
-    public function testExceptionMsg()
+    public function testExceptionMsg() : void
     {
         /* @var DistributedLockBean $bean */
         $bean = BeanFactory::getBean(DistributedLockBean::class);
@@ -71,10 +64,9 @@ class DistributedLockAopTest extends TestCase
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
+     * testRetryToGet
      */
-    public function testRetryToGet()
+    public function testRetryToGet() : void
     {
         /* @var DistributedLockBean $bean */
         $bean = BeanFactory::getBean(DistributedLockBean::class);
@@ -84,14 +76,13 @@ class DistributedLockAopTest extends TestCase
     }
     
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
+     * testExpressionLanguage
      */
-    public function testExpressionLanguage()
+    public function testExpressionLanguage() : void
     {
         /* @var DistributedLockBean $bean */
         $bean = BeanFactory::getBean(DistributedLockBean::class);
-    
+        
         $this->assertEquals('expression-language', $bean->expressionLanguage(['a' => 1]));
     }
 }

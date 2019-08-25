@@ -3,3 +3,4 @@ runtime/
 vendor/
 test/runtime
 composer.lock
+!/test/runtime/

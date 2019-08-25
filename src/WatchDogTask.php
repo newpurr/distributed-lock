@@ -6,10 +6,10 @@ use Happysir\Lock\Concern\System;
 use Happysir\Lock\Contract\LockInterface;
 use Swoft\Bean\Annotation\Mapping\Bean;
 use Swoft\Co;
-use Swoft\Context\Context;
 use Swoft\Log\Helper\CLog;
 use Swoole\Coroutine;
 use Throwable;
+use function context;
 
 /**
  * Class WatchDog
@@ -42,7 +42,7 @@ class WatchDogTask implements Contract\WatchDogInterface
         while ($lock->isAlive()) {
             
             try {
-                Context::mustGet();
+                context();
             } catch (Throwable $e) {
                 CLog::debug('worker[%s] co[%s] cleanup watch dog task after request completed', $workerId, $tid);
                 

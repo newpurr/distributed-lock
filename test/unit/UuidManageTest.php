@@ -7,7 +7,10 @@ use PHPUnit\Framework\TestCase;
 
 class UuidManageTest extends TestCase
 {
-    public function testGenerate()
+    /**
+     * testGenerate
+     */
+    public function testGenerate() : void
     {
         $this->assertNotEmpty((new UuidManage)->generate());
     }

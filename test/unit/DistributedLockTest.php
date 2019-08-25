@@ -13,8 +13,6 @@ use PHPUnit\Framework\TestCase;
 class DistributedLockTest extends TestCase
 {
     /**
-     * @throws \ReflectionException
-     * @throws \Swoft\Bean\Exception\ContainerException
      * @throws \Throwable
      */
     public function testNonBlocking()
