@@ -55,7 +55,6 @@ return [
 
 namespace App\Http\Controller;
 
-use App\Model\Entity\TestAaaa;
 use Happysir\Lock\Annotation\Mapping\DistributedLock;
 use Swoft\Context\Context;
 use Swoft\Http\Message\Request;
@@ -82,7 +81,7 @@ class HomeController
     {
         Coroutine::sleep(1);
         
-        return Context::mustGet()->getResponse();
+        return context()->getResponse();
     }
 
     /**
@@ -94,7 +93,7 @@ class HomeController
     {
         Coroutine::sleep(1);
         
-        return Context::mustGet()->getResponse();
+        return context()->getResponse();
     }
 }
 ````
@@ -112,7 +111,7 @@ class HomeController
 
 > key 这里支持 symfony/expression-language 表达式，可以实现很多复杂的功能，[详细文档](http://www.symfonychina.com/doc/current/components/expression_language/syntax.html)。key 表达式内置 CLASS(类名) 和 METHOD(方法名称) 两个变量，方便开发者使用。详细使用参考Swoft[服务限流](https://www.swoft.org/docs/2.x/zh-CN/ms/govern/limiter.html#%E4%BD%BF%E7%94%A8)章节
 
-#### 代码方式
+#### 代码方式(显式使用)
 ##### `DistributedLock::NON_BLOCKING`
 ```php
 use Happysir\Lock\RedisLock;
