@@ -182,7 +182,7 @@ LUA;
         $lua = <<<LUA
                 local hashVal = redis.call("GET", KEYS[1]);
                 if (hashVal ~=  ARGV[1]) then
-                    return hashVal;
+                    return 0;
                 end;
                 
                 return redis.call("DEL", KEYS[1]);
